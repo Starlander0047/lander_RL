@@ -1,0 +1,2 @@
+tate.copy()
+# print(state)
