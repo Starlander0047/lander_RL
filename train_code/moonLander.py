@@ -23,28 +23,28 @@ MEMORY_SIZE = 100_000     # size of memory buffer
 GAMMA = 0.995             # discount factor
 ALPHA = 1e-3              # learning rate  
 NUM_STEPS_FOR_UPDATE = 4  # perform a learning update every C time steps
-MIN_POINTS_TO_SOLVE = 240.0
+MIN_POINTS_TO_SOLVE = 260.0
 
-observation, info = env.reset(seed=47)
+observation, info = env.reset()
 
 
 q_network = Sequential([
     Input(shape=state_size),
-    Dense(units=64, activation="relu"),
-    Dense(units=64, activation="relu"),
+    Dense(units=128, activation="relu"),
+    Dense(units=128, activation="relu"),
     Dense(units=num_actions, activation="linear")]
 )
 target_q_network = Sequential([
     Input(shape=state_size),
-    Dense(units=64, activation="relu"),
-    Dense(units=64, activation="relu"),
+    Dense(units=128, activation="relu"),
+    Dense(units=128, activation="relu"),
     Dense(units=num_actions, activation="linear")]
 )
 optimizer = tf.keras.optimizers.Adam(learning_rate=ALPHA)
 
 start = time.time()
-num_episodes = 2000
-max_num_timesteps = 1000
+num_episodes = 2500
+max_num_timesteps = 1500
 total_point_history = []
 num_p_av = 100
 epsilon = 1.0
@@ -90,7 +90,7 @@ for i in range(num_episodes):
     
     if av_latest_points >= MIN_POINTS_TO_SOLVE:
         print(f"\n\nEnvironment Solved in {i+1} Episodes!")
-        q_network.save("lunar_lander_solved.keras")
+        q_network.save("lunar_lander_solved[128].keras")
         break
 
 total_time = time.time()-start
@@ -101,12 +101,4 @@ print(f"Total Runtime: {total_time:.2} Seconds OR {(total_time/60):.2f} Minutes"
     
 env.close()
 
-utils.plot_history(total_point_history) #--------------------------------------------------------------------------------This line was added after the training was over[I forgot]
-
-
-
-
-# observation, reward, terminated, truncated, info = env.step(action)
-# print(f"Observation={observation}\nReward={reward}\nInfo={info}")
-# print("\n\n")
-# print("____________________________________________________________________________________")
+utils.plot_history(total_point_history)
