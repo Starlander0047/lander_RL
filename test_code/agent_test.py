@@ -28,6 +28,7 @@ for ep in range(num_episodes):
         
         returns = ll_model(np.expand_dims(observation, axis=0))
         action = np.argmax(returns)
+    
 
         # if engine_fail_ep and action==2:
         #     action = test_utils.engine_fail_probab(action)     # currently for main engine fail

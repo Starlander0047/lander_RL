@@ -12,10 +12,11 @@ import pandas as pd
 from statsmodels.iolib.table import SimpleTable
 
 
-E_MIN=0.01
-MINIBATCH_SIZE = 64
-E_DECAY=0.995
-TAU=1e-3
+E_MIN = 0.01
+MINIBATCH_SIZE = 128
+E_DECAY = 0.995
+TAU = 1e-3
+ENGINE_FAIL_PROBAB = 0.05
 
 def get_new_eps(epsilon):
     return max(E_MIN, E_DECAY*epsilon)
@@ -71,6 +72,21 @@ def agent_learn(experiences, GAMMA, q_network, target_q_network, optimizer):
 
     update_target_network(q_network, target_q_network)
 
+
+# Functions created by me for adding noise
+def addNoiseXY(state):
+    noise = np.random.normal(0 ,0.02, 5)
+    noiseVal = np.random.choice(noise, 1)
+    state[0]+=noiseVal
+    state[1]+=noiseVal
+
+    return state
+
+def engineFailure():
+    if random.random() <= ENGINE_FAIL_PROBAB:
+        return True
+    else:
+        return False
 
 
 # Functions for Graph Plotting[Copy Pasted]

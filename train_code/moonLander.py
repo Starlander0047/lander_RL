@@ -9,9 +9,20 @@ import utils
 import logging
 
 #Logger Code Starts
-logging.basicConfig(filename="train.log", format='%(asctime)s %(levelname)s %(message)s')
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger = logging.getLogger('my_logger')
+logger.setLevel(logging.DEBUG)  # Set to lowest level to capture everything
+# Create handlers
+reward_handler = logging.FileHandler('reward.log')
+reward_handler.setLevel(logging.DEBUG)
+
+# Create formatters
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+# Add formatters to handlers
+reward_handler.setFormatter(formatter)
+
+# Add handlers to logger
+logger.addHandler(reward_handler)
 #Logger Code Ends
 
 # Environment Information
@@ -23,7 +34,7 @@ MEMORY_SIZE = 100_000     # size of memory buffer
 GAMMA = 0.995             # discount factor
 ALPHA = 1e-3              # learning rate  
 NUM_STEPS_FOR_UPDATE = 4  # perform a learning update every C time steps
-MIN_POINTS_TO_SOLVE = 260.0
+MIN_POINTS_TO_SOLVE = 220.0
 
 observation, info = env.reset()
 
@@ -54,16 +65,25 @@ target_q_network.set_weights(q_network.get_weights())
 
 logger.critical(f"---------***********---------Gravity = {GRAVITY}, Min_PointsToSolve={MIN_POINTS_TO_SOLVE}")
 for i in range(num_episodes):
-    state = env.reset()[0] #------------------------------------------------------------------------------May Give a particular seed here
+    state = env.reset()[0]  # Here 'state' is np array
     total_points = 0
+    state = utils.addNoiseXY(state)   # Added by me for noise addition to X and Y coordinates
 
     for t in range(max_num_timesteps):
-        state_qn = np.expand_dims(state, axis=0) #--------------------------------------------------Coursera people have just written state not state[0]
+
+        state_qn = np.expand_dims(state, axis=0)
         q_values = q_network(state_qn)
         action = utils.get_action(q_values, epsilon)
 
-        next_state, reward, terminated, *_ = env.step(action)
-        memory_buffer.append(experience(state, action, reward, next_state, terminated)) #--------------Here 'state' is a tuple of observation and info
+        # Code for Engine Failure starts
+        if utils.engineFailure():
+            action = 0
+        # Code for Engine Failure ends
+
+        next_state, reward, terminated, *_ = env.step(action)  # next_state is nd numpy array (8,)
+
+        next_state = utils.addNoiseXY(next_state)   # Added by me for noise addition to X and Y coordinates
+        memory_buffer.append(experience(state, action, reward, next_state, terminated))
 
         update = utils.check_update_condition(t, NUM_STEPS_FOR_UPDATE, memory_buffer) #----------------Why not just send the size of memory_buffer?
 
@@ -71,7 +91,7 @@ for i in range(num_episodes):
             experiences = utils.get_experiences(memory_buffer)
             utils.agent_learn(experiences, GAMMA, q_network, target_q_network, optimizer)
         
-        state = next_state.copy() #--------------------------------------------------------------------Know if 'state' and 'next_state' have same dtype(i dont think)
+        state = next_state.copy()
         total_points += reward
 
         if terminated:
@@ -90,7 +110,7 @@ for i in range(num_episodes):
     
     if av_latest_points >= MIN_POINTS_TO_SOLVE:
         print(f"\n\nEnvironment Solved in {i+1} Episodes!")
-        q_network.save("lunar_lander_solved[128].keras")
+        q_network.save("lunar_lander_solved[-9.8=220=128N=128MBS=0.05EF=0M,0.02SD,5P].keras")
         break
 
 total_time = time.time()-start
