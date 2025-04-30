@@ -85,7 +85,7 @@ for i in range(num_episodes):
         next_state = utils.addNoiseXY(next_state)   # Added by me for noise addition to X and Y coordinates
         memory_buffer.append(experience(state, action, reward, next_state, terminated))
 
-        update = utils.check_update_condition(t, NUM_STEPS_FOR_UPDATE, memory_buffer) #----------------Why not just send the size of memory_buffer?
+        update = utils.check_update_condition(t, NUM_STEPS_FOR_UPDATE, memory_buffer)
 
         if update:
             experiences = utils.get_experiences(memory_buffer)
@@ -110,7 +110,7 @@ for i in range(num_episodes):
     
     if av_latest_points >= MIN_POINTS_TO_SOLVE:
         print(f"\n\nEnvironment Solved in {i+1} Episodes!")
-        q_network.save("lunar_lander_solved[-9.8=220=128N=128MBS=0.05EF=0M,0.02SD,5P].keras")
+        q_network.save("lunar_lander_solved[-9.8=220=128N=128MBS].keras")
         break
 
 total_time = time.time()-start
